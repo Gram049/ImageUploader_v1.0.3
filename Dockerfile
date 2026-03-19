@@ -1,25 +1,27 @@
-FROM node:18-slim
+# --- imagem base ---
+FROM node:20-slim
 
-# Instalar ffmpeg + ffprobe
-RUN apt-get update && apt-get install -y ffmpeg \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
-
-# Diretório da app
+# --- diretório de trabalho ---
 WORKDIR /app
 
-# Copiar dependências
+# --- instalar ferramentas de build necessárias para dependências nativas ---
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3 \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+
+# --- copiar package.json e package-lock.json para instalar dependências ---
 COPY package*.json ./
 
-# Instalar dependências Node
+# --- instalar dependências de produção ---
 RUN npm install --omit=dev
 
-# Copiar código
+# --- copiar resto do código ---
 COPY . .
 
-# Porta usada pelo Fly
-ENV PORT=3000
+# --- expor porta do servidor ---
 EXPOSE 3000
 
-# Start
-CMD ["npm", "start"]
+# --- comando para iniciar o server ---
+CMD ["node", "server.js"]
