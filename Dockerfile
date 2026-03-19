@@ -1,27 +1,34 @@
-# --- imagem base ---
-FROM node:20-slim
+# Dockerfile — Node 20 + ffmpeg + dependências nativas
+FROM node:20-bullseye
 
-# --- diretório de trabalho ---
-WORKDIR /app
-
-# --- instalar ferramentas de build necessárias para dependências nativas ---
+# Instalar dependências do sistema para ffmpeg e módulos Node nativos
 RUN apt-get update && apt-get install -y \
+    ffmpeg \
     build-essential \
     python3 \
+    pkg-config \
+    libcairo2-dev \
+    libjpeg-dev \
+    libgif-dev \
+    libpango1.0-dev \
+    libpng-dev \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# --- copiar package.json e package-lock.json para instalar dependências ---
+# Definir diretório de trabalho
+WORKDIR /app
+
+# Copiar package.json + package-lock.json
 COPY package*.json ./
 
-# --- instalar dependências de produção ---
+# Instalar dependências de produção
 RUN npm install --omit=dev
 
-# --- copiar resto do código ---
+# Copiar restante do código
 COPY . .
 
-# --- expor porta do servidor ---
+# Expõe porta padrão (mesma que o server.js)
 EXPOSE 3000
 
-# --- comando para iniciar o server ---
+# Comando para iniciar o servidor
 CMD ["node", "server.js"]
