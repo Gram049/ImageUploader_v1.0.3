@@ -1,7 +1,8 @@
-# Dockerfile — Node 20 + ffmpeg + dependências nativas
+# Dockerfile para Image Uploader no Fly.io
+# Base Node.js 20 com Debian Bullseye (estável)
 FROM node:20-bullseye
 
-# Instalar dependências do sistema para ffmpeg e módulos Node nativos
+# Instala ffmpeg e dependências nativas necessárias para módulos de imagem
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     build-essential \
@@ -15,20 +16,20 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# Definir diretório de trabalho
+# Define o diretório de trabalho
 WORKDIR /app
 
-# Copiar package.json + package-lock.json
+# Copia os ficheiros de package para instalar dependências
 COPY package*.json ./
 
-# Instalar dependências de produção
-RUN npm install --omit=dev
+# Instala todas as dependências (dev + prod) para evitar falhas de build de módulos nativos
+RUN npm install
 
-# Copiar restante do código
+# Copia o restante do projeto
 COPY . .
 
-# Expõe porta padrão (mesma que o server.js)
+# Expõe a porta onde o server vai correr
 EXPOSE 3000
 
-# Comando para iniciar o servidor
+# Comando para iniciar o server
 CMD ["node", "server.js"]
